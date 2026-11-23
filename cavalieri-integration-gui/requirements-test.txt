@@ -1,0 +1,5 @@
+# Install application dependencies and the local backend first (root make all/setup).
+pytest>=8,<10
+pytest-playwright>=0.7,<1
+pytest-timeout>=2,<3
+pytest-cov

@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<script defer src="./mathlive/mathlive.min.js"></script>
+	<style>
+		body {
+			height: 100%;
+			margin: 0;
+			overflow-y: auto;
+			padding: 16px;
+			font-family: sans-serif;
+		}
+
+		.bodydiv.dark button {
+			background: #2f2f2f;
+			color: white;
+		}
+
+		.bodydiv.light button {
+			background: #ececec;
+		}
+
+		.bodydiv.light button:hover {
+			background: #dddddd;
+
+		}
+
+		.bodydiv.dark math-field {
+			background-color: rgba(38, 39, 48, 1);
+			color: rgb(250, 250, 250);
+		}
+
+		.bodydiv.light math-field {
+			background-color: #fafafa;
+			color: rgba(38, 39, 48, 1);
+		}
+
+		math-field {
+			width: 100%;
+			min-height: 56px;
+			font-size: 1.5rem;
+			padding: 8px;
+			box-sizing: border-box;
+			border-radius: 10px;
+			--selection-background-color: rgba(100, 100, 255, 1);
+			--contains-highlight-background-color: rgba(100, 100, 255, 1);
+			--caret-color: #ff0000;
+
+		}
+
+
+		math-field::part(caret) {
+			width: 10px !important;
+			border-radius: 2px;
+		}
+
+		.preview-label {
+			margin-top: 18px;
+			margin-bottom: 8px;
+			font-size: 0.95rem;
+		}
+
+		.preview {
+			min-height: 50px;
+			padding: 12px;
+			border: 1px solid #ccc;
+			border-radius: 8px;
+			font-size: 1.8rem;
+			background: #fafafa;
+			display: none;
+		}
+
+		.pad {
+			margin-top: 20px;
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 10px;
+		}
+
+		.pad button {
+			height: 52px;
+			font-size: 1.2rem;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+		}
+
+		.pad button:hover {}
+
+		.wide {
+			grid-column: span 2;
+		}
+
+		/* Hide MathLive built-in controls */
+		math-field::part(menu-toggle) {
+			display: none;
+		}
+
+		math-field::part(virtual-keyboard-toggle) {
+			display: none;
+		}
+
+		.tab-container {
+			height: 200%;
+			width: 100%;
+			display: grid;
+			grid-template-columns: auto auto auto;
+			gap: 14px;
+			margin-top: 12px;
+			align-items: center;
+
+		}
+
+		.tab-content.numbers,
+		.tab-content.symbols,
+		.tab-content.trigonometry {
+			margin-top: 0;
+			width: auto;
+			height: auto;
+			border-radius: 0;
+
+		}
+
+		.tab-content.numbers {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			grid-template-rows: repeat(4, 1fr);
+			gap: 6px;
+			padding-top: 0;
+		}
+
+		.tab-content.symbols {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			grid-template-rows: repeat(4, 1fr);
+			gap: 6px;
+		}
+
+		.tab-content.trigonometry {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			grid-template-rows: repeat(4, 1fr);
+			gap: 6px;
+		}
+
+		.tab-content button {
+			height: 42px;
+			width: 100%;
+			min-width: 20px;
+			border: none;
+			border-radius: 6px;
+			font-size: 1rem;
+			cursor: pointer;
+			padding: 0;
+			white-space: nowrap;
+			overflow: hidden;
+
+			box-sizing: border-box;
+		}
+
+		.tab-content button:hover {
+			background: #404040;
+		}
+	</style>
+</head>
+
+<body>
+
+
+
+
+
+	<div class="bodydiv" id="bodydiv">
+		<div class="equation-field">
+			<math-field id="mf"></math-field>
+		</div>
+
+		<div class="preview">
+			<math-field id="display" read-only></math-field>
+		</div>
+
+		<div class="tab-container">
+			<div class="tab-content numbers">
+
+				<button type="button" tabindex="0" onclick="insert('7')">7</button>
+				<button type="button" tabindex="-1" onclick="insert('8')">8</button>
+				<button type="button" tabindex="-1" onclick="insert('9')">9</button>
+
+				<button type="button" tabindex="-1" onclick="insert('4')">4</button>
+				<button type="button" tabindex="-1" onclick="insert('5')">5</button>
+				<button type="button" tabindex="-1" onclick="insert('6')">6</button>
+
+				<button type="button" tabindex="-1" onclick="insert('1')">1</button>
+				<button type="button" tabindex="-1" onclick="insert('2')">2</button>
+				<button type="button" tabindex="-1" onclick="insert('3')">3</button>
+
+				<div></div>
+				<button type="button" tabindex="-1" onclick="insert('0')">0</button>
+				<div></div>
+			</div>
+
+			<div class="tab-content symbols">
+				<button type="button" tabindex="-1" onclick="insert('\\pi')">π</button>
+				<button type="button" tabindex="-1" onclick="insert('e')">e</button>
+				<button type="button" tabindex="-1" onclick="insert('\\left|#?\\right|')">|☐|</button>
+				<button tabindex="-1" onclick="insert('\\ln(#?)')">ln</button>
+				<button tabindex="-1" onclick="insert('^{#?}')">☐
+					<!-- This makes the exponent ■-->
+					<span style="position:relative; top: -1em;  font-size: 40%">▢</span>
+				</button>
+				<button tabindex="-1" onclick="insert('\\sqrt{#?}')">√</button>
+
+
+				<button type="button" tabindex="-1" onclick="insert('(')">(</button>
+				<button type="button" tabindex="-1" onclick="insert(')')">)</button>
+				<button type="button" tabindex="-1" onclick="insert('+')">+</button>
+				<button type="button" tabindex="-1" onclick="insert('-')">−</button>
+				<button type="button" tabindex="-1" onclick="insert('\\times')">×</button>
+				<button type="button" tabindex="-1" onclick="execute(['insert', '\\frac{#@}{#?}'])">÷</button>
+				<button type="button" data-var="x" tabindex="-1" onclick="insert('x')">x</button>
+				<button type="button" data-var="y" tabindex="-1" onclick="insert('y')">y</button>
+				<button type="button" data-var="z" tabindex="-1" onclick="insert('z')">z</button>
+				<button type="button" tabindex="-1" onclick="backspace()">⌫</button>
+
+			</div>
+			<div class="tab-content trigonometry">
+				<button tabindex="-1" onclick="insert('\\sin(#?)')">sin</button>
+				<button tabindex="-1" onclick="insert('\\cos(#?)')">cos</button>
+				<button tabindex="-1" onclick="insert('\\tan(#?)')">tan</button>
+
+				<button tabindex="-1" onclick="insert('\\operatorname{asin}(#?)')">asin</button>
+				<button tabindex="-1" onclick="insert('\\operatorname{acos}(#?)')">acos</button>
+				<button tabindex="-1" onclick="insert('\\operatorname{atan}(#?)')">atan</button>
+				<button tabindex="-1" onclick="insert('\\sinh(#?)')">sinh</button>
+				<button tabindex="-1" onclick="insert('\\cosh(#?)')">cosh</button>
+				<button tabindex="-1" onclick="insert('\\tanh(#?)')">tanh</button>
+				<button tabindex="-1" onclick="insert('\\operatorname{asinh}(#?)')">asinh</button>
+				<button tabindex="-1" onclick="insert('\\operatorname{acosh}(#?)')">acosh</button>
+				<button tabindex="-1" onclick="insert('\\operatorname{atanh}(#?)')">atanh</button>
+
+				<!-- <button class="wide" onclick="clearAll()">Clear</button> -->
+				<!-- <button class="wide" onclick="insert('=')">=</button> -->
+			</div>
+		</div>
+	</div>
+
+
+	<script>
+		let initialized = false;
+		let allowedKeys = new Set();
+		let allowedLetters = new Set();
+		let mf = null;
+		let display = null;
+		function setComponentValue(value) {
+			window.parent.postMessage({
+				isStreamlitMessage: true,
+				type: "streamlit:setComponentValue",
+				value: value
+			}, "*");
+		}
+		function setFrameHeight() {
+			window.parent.postMessage({
+				isStreamlitMessage: true,
+				type: "streamlit:setFrameHeight",
+				height: document.documentElement.scrollHeight
+			}, "*");
+		}
+		function componentReady() {
+			window.parent.postMessage({
+				isStreamlitMessage: true,
+				type: "streamlit:componentReady",
+				apiVersion: 1
+			}, "*");
+		}
+		function getKeypadButtons() {
+			return [...document.querySelectorAll(".tab-content button")]
+				.filter((button) => {
+					return button.offsetParent !== null &&
+						getComputedStyle(button).visibility !== "hidden";
+				});
+		}
+
+		function focusKeypadButton(button) {
+			getKeypadButtons().forEach((btn) => {
+				btn.tabIndex = -1;
+			});
+
+			button.tabIndex = 0;
+			button.focus();
+		}
+
+		function moveKeypadFocus(currentButton, direction) {
+			const buttons = getKeypadButtons();
+
+			const currentRect = currentButton.getBoundingClientRect();
+			const currentX = currentRect.left + currentRect.width / 2;
+			const currentY = currentRect.top + currentRect.height / 2;
+
+			let bestButton = null;
+			let bestScore = Infinity;
+
+			buttons.forEach((button) => {
+				if (button === currentButton) {
+					return;
+				}
+
+				const rect = button.getBoundingClientRect();
+				const x = rect.left + rect.width / 2;
+				const y = rect.top + rect.height / 2;
+
+				const dx = x - currentX;
+				const dy = y - currentY;
+
+				let valid = false;
+				let score = Infinity;
+
+				switch (direction) {
+					case "ArrowLeft":
+						if (dx < 0) {
+							valid = true;
+							score = Math.abs(dx) + Math.abs(dy) * 3;
+						}
+						break;
+
+					case "ArrowRight":
+						if (dx > 0) {
+							valid = true;
+							score = Math.abs(dx) + Math.abs(dy) * 3;
+						}
+						break;
+
+					case "ArrowUp":
+						if (dy < 0) {
+							valid = true;
+							score = Math.abs(dy) + Math.abs(dx) * 3;
+						}
+						break;
+
+					case "ArrowDown":
+						if (dy > 0) {
+							valid = true;
+							score = Math.abs(dy) + Math.abs(dx) * 3;
+						}
+						break;
+				}
+
+				if (valid && score < bestScore) {
+					bestScore = score;
+					bestButton = button;
+				}
+			});
+
+			if (bestButton) {
+				focusKeypadButton(bestButton);
+			}
+		}
+		window.addEventListener("load", (event) => {
+			// Initialize connection
+			mf = document.getElementById("mf");
+			display = document.getElementById("display");
+			mf.smartFence = false
+			document.addEventListener("keydown", (e) => {
+				if (
+					e.key === "Tab" &&
+					e.composedPath().includes(mf)
+				) {
+					e.stopImmediatePropagation();
+				}
+			}, true);
+
+
+
+
+			mf.mathVirtualKeyboardPolicy = "manual";
+			mf.executeCommand('move-to-mathfield-end');
+
+
+			mf.addEventListener("input", () => {
+
+
+				if (mf.value.includes("^{}")) {
+					mf.executeCommand('delete-backward');
+					mf.insert("^{\\placeholder{}}");
+				}
+				let functionShortcuts = {
+					"asinh": "\\operatorname{\\mathrm{asinh}}(\\placeholder{})",
+					"acosh": "\\operatorname{\\mathrm{acosh}}(\\placeholder{})",
+					"atanh": "\\operatorname{\\mathrm{atanh}}(\\placeholder{})",
+					"asin": "\\operatorname{\\mathrm{asin}}(\\placeholder{})",
+					"acos": "\\operatorname{\\mathrm{acos}}(\\placeholder{})",
+					"atan": "\\operatorname{\\mathrm{atan}}(\\placeholder{})",
+					"sinh": "\\sinh(\\placeholder{})",
+					"cosh": "\\cosh(\\placeholder{})",
+					"tanh": "\\tanh(\\placeholder{})",
+					"sqrt": "\\sqrt(\\placeholder{})",
+					"sin": "\\sin(\\placeholder{})",
+					"cos": "\\cos(\\placeholder{})",
+					"tan": "\\tan(\\placeholder{})",
+					"ln": "\\ln(\\placeholder{})"
+				};
+
+
+
+				const functionNames = Object.keys(functionShortcuts)
+					.sort((a, b) => b.length - a.length);
+				// Check if a function name was typed immediately before the cursor
+				for (const func of functionNames) {
+					const pos = mf.position;
+					const shortcutStartPos = pos - func.length;
+
+					if (shortcutStartPos < 0) {
+						continue;
+					}
+
+					const cursorValue = mf.getValue(shortcutStartPos, pos);
+
+					if (cursorValue !== func) {
+						continue;
+					}
+
+
+					// Select only the typed function name
+					mf.selection = {
+						ranges: [[shortcutStartPos, pos]],
+						direction: "forward"
+					};
+
+
+					// Replace it with the correct MathLive function
+					mf.insert(functionShortcuts[func], {
+						selectionMode: "after",
+						silenceNotifications: true
+					});
+
+					break;
+				}
+
+				// These are a "function" that has a "{...}" following it
+				const oneBracketFunction = {
+					"\\ln": "(\\placeholder{})",
+					"\\sin": "(\\placeholder{})",
+					"\\cos": "(\\placeholder{})",
+					"\\tan": "(\\placeholder{})",
+					"\\operatorname{\\mathrm{asin}}": "(\\placeholder{})",
+					"\\operatorname{\\mathrm{acos}}": "(\\placeholder{})",
+					"\\operatorname{\\mathrm{atan}}": "(\\placeholder{})",
+					"\\sinh": "(\\placeholder{})",
+					"\\cosh": "(\\placeholder{})",
+					"\\tanh": "(\\placeholder{})",
+					"\\operatorname{\\mathrm{asinh}}": "(\\placeholder{})",
+					"\\operatorname{\\mathrm{acosh}}": "(\\placeholder{})",
+					"\\operatorname{\\mathrm{atanh}}": "(\\placeholder{})",
+					"\\left|": "(\\placeholder{})",
+					"\\sqrt": "(\\placeholder{})"
+				};
+
+				Object.keys(oneBracketFunction).forEach((func) => {
+					// Values can only be removed 1 "section" at a time, so this boolean checking and manual removal is good enough 
+					// Should maybe do a loop through with startswith or something similar
+					if (mf.value.includes(func + "()") || mf.value.includes(func + "\\left(\\right)")) {
+						//mf.executeCommand('delete-backward');
+						//mf.executeCommand('delete-forward');
+						//mf.insert(oneBracketFunction[func]);
+					}
+				});
+
+
+				["asin}}", "acos}}", "atan}}", "\\sin", "\\cos", "\\tan"].forEach((func) => {
+					if (mf.value.includes(func + "(h") || mf.value.includes(func + "\\left(h")) {
+						//mf.value = (mf.value.replace("}}\\left(h", "h}}(\\placeholder{}"));
+						mf.value = mf.value.replace("}}(h", "h}}(\\placeholder{}");
+
+						//mf.value = (mf.value.replace("\\left(h", "h(\\placeholder{}"));
+						mf.value = (mf.value.replace(func + "(h", func + "h(\\placeholder{}"));
+
+
+					}
+
+					if (mf.value.includes(func + "h")) {
+						mf.value = (mf.value.replace("}}h", "h}}"));
+					}
+				});
+
+				["sinh", "cosh", "tanh", "sin", "cos", "tan"].forEach((func) => {
+					if (mf.value.includes("a\\" + func)) {
+						mf.value = (mf.value.replace("a\\" + func, "\\operatorname{\\mathrm{a" + func + "}}"));
+						""
+					}
+					if (mf.value.includes(func + " h")) {
+						mf.value = (mf.value.replace(func + " h", func + "h"));
+					}
+				});
+
+				mf.focus();
+				sync();
+			});
+
+			window.execute = (cmb) => {
+				mf.executeCommand(cmb)
+				sync();
+			};
+			window.insert = (latex) => {
+				mf.insert(latex);
+				sync();
+			};
+
+			window.backspace = () => {
+				if (!mf.selectionIsCollapsed) {
+					mf.insert("", {
+						insertionMode: "replaceSelection",
+						selectionMode: "after",
+						silenceNotifications: true
+					});
+				}
+				mf.executeCommand("delete-backward");
+				sync();
+			};
+
+			window.clearAll = () => {
+				mf.value = "";
+				sync();
+			};
+
+			function sync() {
+				mf.focus();
+				display.value = mf.value;
+				setComponentValue(mf.value)
+				setFrameHeight();
+			}
+			componentReady()
+			setComponentValue(mf.value)
+			window.onresize = setFrameHeight;
+
+			mf.addEventListener("keydown", (e) => {
+				if ((e.ctrlKey || e.metaKey) && ["v", "r", "z"].includes(e.key.toLowerCase())) {
+					//TO-DO: Check that keys cant add things like Ctr + Enter adds newline
+					// Should still allow pasting, undo and reloading page
+					return;
+				}
+
+				if (allowedKeys.has(e.key)) {
+					return;
+				};
+
+				if (e.key.length === 1 && /[a-z]/i.test(e.key) && allowedLetters.has(e.key)) {
+					return;
+				}
+				if (e.key === "Backspace") {
+					if (!mf.selectionIsCollapsed) {
+						e.preventDefault();
+						e.stopImmediatePropagation();
+						mf.insert("", {
+							insertionMode: "replaceSelection",
+							selectionMode: "after",
+							silenceNotifications: true
+						});
+						sync()
+						return;
+
+					}
+					mf.executeCommand("delete-backward");
+
+				}
+
+
+				e.preventDefault();
+			}, {capture: true});
+			document.querySelectorAll(".tab-content button").forEach((button) => {
+				button.addEventListener("keydown", (e) => {
+
+					if (
+						e.key === "ArrowLeft" ||
+						e.key === "ArrowRight" ||
+						e.key === "ArrowUp" ||
+						e.key === "ArrowDown"
+					) {
+						e.preventDefault();
+						moveKeypadFocus(button, e.key);
+						return;
+					}
+
+					// Keep keyboard focus on the selected keypad button
+					// when activating it with Enter or Space.
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
+
+						button.click();
+
+						requestAnimationFrame(() => {
+							focusKeypadButton(button);
+						});
+					}
+				});
+			});
+		});
+
+
+		function applyTheme(theme) {
+			// const theme = data.args.theme
+
+
+			const bdiv = document.getElementById("bodydiv");
+			bdiv.classList.remove("dark", "light");
+			if (theme.toLowerCase() === '"dark"') {
+				bdiv.classList.add("dark");
+			}
+			else if (theme.toLowerCase() === '"light"') {
+				bdiv.classList.add("light");
+			}
+			else if (theme.toLowerCase() === '"system"') {
+				const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+				bdiv.classList.add(prefersDark ? "dark" : "light");
+			} else {
+				bdiv.classList.add("dark");
+			}
+		}
+
+
+		window.addEventListener("storage", (event) => {
+			// Test for theme change:
+
+			const themeRegex = /^stActiveTheme-.*-v2$/;
+			if (event.key && themeRegex.test(event.key)) {
+				for (let i = localStorage.length - 1; i >= 0; i--) {
+					const currentKey = localStorage.key(i);
+					if (currentKey && themeRegex.test(currentKey) && localStorage.getItem(currentKey) !== event.newValue) {
+						localStorage.setItem(currentKey, event.newValue);
+					}
+				}
+				applyTheme(event.newValue);
+			}
+		});
+
+		window.addEventListener("message", (event) => {
+			const data = event.data;
+
+			if (!data || data.type !== "streamlit:render") return;
+
+			const args = data.args || {};
+			const value = args.value ?? "";
+			const variables = args.variables ?? "";
+
+			const themeRegex = /^stActiveTheme-.*-v2$/;
+			for (let i = localStorage.length - 1; i >= 0; i--) {
+				const currentKey = localStorage.key(i);
+				if (currentKey && themeRegex.test(currentKey)) {
+					const curTheme = localStorage.getItem(currentKey)
+					applyTheme(curTheme);
+					break;
+				}
+			}
+
+
+			if (args.changeVal) {
+				initialized = false;
+			}
+
+
+			document.querySelectorAll("button[data-var]").forEach((btn) => {
+				btn.style.visibility = variables.includes(btn.dataset.var) ? "visible" : "hidden";
+			});
+
+			if (!initialized && mf) {
+				const expr = value || "0";
+				mf.value = expr;
+				if (display) display.value = expr;
+				mf.executeCommand("move-to-mathfield-end");
+				initialized = true;
+				setComponentValue(expr)
+
+				allowedKeys = new Set([
+					"Delete",
+					"ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
+					"Home", "End" //, "Enter", "Tab", "Escape"
+				]);
+				const allowedTokens = new Set([
+					"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+					"+", "-", "*", "/", "(", ")", ".", "^", "|",
+					"pi", "e", "ln",
+					"sin", "cos", "tan",
+					"asin", "acos", "atan",
+					"sinh", "cosh", "tanh",
+					"asinh", "acosh", "atanh", "sqrt"
+				]);
+				[...variables].forEach((vars) => {
+					allowedTokens.add(vars); // Adds "x", "y", "z" from args
+				});
+
+				const notAllowedShortCuts = new Set([
+					"&", "%", "$", "''", "'''", "''''", "Delta", "AA", "EE", "!EE", "&&",
+					"!in", "NN", "CC", "xx", "+-", "!=", ">=", "<=", "<<", ">>", "?=", ":=",
+					"::", "(:", ":)", "Gamma", "Lambda", "Omega", "!exists", ":.", "(mod",
+					"Im", "...", "+...", "-...", "->...", "-->...", "->", "-->", "<--",
+					"=>", "==>", "<=>", "<->", "(+)", "(/)", "(*)", "(-)", "*", "**",
+					"***", "//", "><|", "-:", "@", "-=", "-<", "-lt", "-<=", ">-=",
+					">->", "->>", ">->>",
+					"alpha", "delta", "pi", "Pi", "theta", "Theta", "ii", "jj", "ee", "nabla",
+					"grad", "del", "deg", "infty", "∞", "oo", "∑", "sum", "int", "prod",
+					"sqrt", "∆", "∂", "sin", "cos", "tan", "arccos", "arcsin", "arctan",
+					"arctg", "arcsec", "arccsc", "arsinh", "arccosh", "arcosh", "artanh",
+					"arctanh", "arcsech", "arccsch", "ch", "cosec", "cosh", "cot", "cotg",
+					"coth", "csc", "ctg", "cth", "sec", "sech", "sinh", "sh", "tanh", "tg",
+					"th", "arg", "lg", "lb", "log", "ln", "exp", "lim", "dx", "dy", "dt",
+					"xin", "sint", "in", "ZZ", "QQ", "RR", "≠", "≥", "≤", "~~", "≈", "÷",
+					"¬", "beta", "chi", "epsilon", "varepsilon", "eta", "gamma", "iota",
+					"kappa", "lambda", "mu", "nu", "µ", "phi", "Phi", "varphi", "psi",
+					"Psi", "rho", "sigma", "Sigma", "tau", "vartheta", "upsilon", "xi",
+					"Xi", "zeta", "omega", "Ω", "forall", "exists", "liminf", "limsup",
+					"argmin", "argmax", "det", "mod", "max", "min", "erf", "erfc", "bessel",
+					"mean", "median", "fft", "lcm", "gcd", "randomReal", "randomInteger",
+					"Re", "mm", "cm", "km", "kg", "ft", "inch", "mi", "|->", "(.)", "||",
+					"\\\\", "setminus", "|><", "|><|", "divide", "^^", "^^^", "vv", "vvv",
+					"nn", "nnn", "uu", "uuu", "~=", "lt", "lt=", "gt", "gt=", "prop",
+					"diamond", "square", "iff", "sub", "sup", "sube", "supe", "uarr", "darr",
+					"rarr", "rArr", "larr", "lArr", "harr", "hArr", "aleph", "and", "or",
+					"not", "_|_", "TT", "|--", "|==", "|__", "__|", "|~", "~|", "times",
+					"of", "infinity", "defint", "approaches", "ceil", "floor", "union",
+					"asterisk", "frac", "cbrt", "nthroot"
+				]);
+
+				const shortcuts = {
+					...mf.inlineShortcuts,
+				};
+				notAllowedShortCuts.forEach((cut) => {
+					delete shortcuts[cut];
+				});
+				mf.inlineShortcuts = {
+					...shortcuts,
+					//"^": "^{\\placeholder{}}",
+					//"ln": "\\ln(#?)",
+					//"sqrt": "\\sqrt{#?}",
+					//"pi": "\\pi",
+					//"sin": "\\sin(#?)",
+					//"cos": "\\cos(#?)",
+					//"tan": "\\tan(#?)",
+					//"asin": "\\operatorname{\\mathrm{asin}}(#?)",
+					//"acos": "\\operatorname{\\mathrm{acos}}(#?)",
+					//"atan": "\\operatorname{\\mathrm{atan}}(#?)",
+					//"sinh": "\\sinh(#?)",
+					//"cosh": "\\cosh(#?)",
+					//"tanh": "\\tanh(#?)",
+					//"asinh": "\\operatorname{\\mathrm{asinh}}(#?)",
+					//"acosh": "\\operatorname{\\mathrm{acosh}}(#?)",
+					//"atanh": "\\operatorname{\\mathrm{atanh}}(#?)",
+
+				};
+
+
+
+				// Add 1-length tokens(nothing else needed)
+				allowedTokens.forEach((token) => {
+					if (token.length === 1) {
+						allowedKeys.add(token);
+					}
+				});
+				allowedLetters = new Set();
+				allowedTokens.forEach((token) => {
+					[...token].forEach((letter) => {
+						if (/[a-z]/i.test(letter) && !allowedLetters.has(letter)) {
+							allowedLetters.add(letter.toLowerCase());
+						}
+					})
+				});
+
+			}
+		});
+		const bdiv = document.getElementById("bodydiv");
+		bdiv.classList.add("dark");
+	</script>
+</body>
+
+</html>

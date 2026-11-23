@@ -1,0 +1,11 @@
+streamlit
+streamlit-image-coordinates
+pillow
+altair<5
+numpy
+plotly
+pandas
+cavint==1.0.4
+matplotlib
+trimesh # for 3D printing
+scipy # for 3D printing

@@ -1,0 +1,34 @@
+[package]
+name = "cavint"
+version = "1.0.4"
+edition = "2021"
+authors = ["Christoff van Zyl <stoffel1997@gmail.com>"]
+license-file = "LICENSE"
+description = "A Rust native library for Cavalieri integration."
+readme = "README.md"
+
+[build]
+rustdocflags = [ "--html-in-header", "docs-header.html" ]
+
+[package.metadata.docs.rs]
+rustdoc-args = [ "--html-in-header", "docs-header.html" ]
+
+
+[lib]
+name = "cavint"
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+# peroxide = "0.32.1"
+approx = "0.5.1"
+thiserror = "1.0.37"
+pyo3 = { version = "0.17.2", features = ["extension-module"] }
+roots = "0.0.7"
+nom = "7.1.1"
+ordered-float = "3.3.0"
+log = { version = "0.4.17", features = ["release_max_level_off"] }
+env_logger = "0.9.1"
+rust-latex-parser = "0.1"
+
+[dev-dependencies]
+proptest = "1"
